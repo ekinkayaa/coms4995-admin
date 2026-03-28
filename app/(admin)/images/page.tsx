@@ -34,6 +34,15 @@ function Badge({ on, label, color = "#16a34a" }: { on: boolean; label: string; c
   );
 }
 
+type UploadForm = {
+  file: File | null;
+  url: string;
+  additional_context: string;
+  image_description: string;
+  is_public: boolean;
+  is_common_use: boolean;
+};
+
 export default function ImagesPage() {
   const [images, setImages] = useState<Image[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +51,16 @@ export default function ImagesPage() {
   const [error, setError] = useState<string | null>(null);
   const [toasting, setToasting] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadForm, setUploadForm] = useState<UploadForm>({
+    file: null,
+    url: "",
+    additional_context: "",
+    image_description: "",
+    is_public: true,
+    is_common_use: false,
+  });
   const supabase = createClient();
 
   async function load() {
@@ -95,6 +114,50 @@ export default function ImagesPage() {
     }
   }
 
+  async function handleUpload() {
+    setUploading(true);
+    let finalUrl = uploadForm.url;
+
+    if (uploadForm.file) {
+      const ext = uploadForm.file.name.split(".").pop();
+      const path = `uploads/${Date.now()}.${ext}`;
+      const { data: storageData, error: storageError } = await supabase.storage
+        .from("images")
+        .upload(path, uploadForm.file, { upsert: false });
+      if (storageError) {
+        toast("Upload error: " + storageError.message);
+        setUploading(false);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from("images").getPublicUrl(storageData.path);
+      finalUrl = urlData.publicUrl;
+    }
+
+    if (!finalUrl) {
+      toast("Please provide a file or URL");
+      setUploading(false);
+      return;
+    }
+
+    const { error: insertError } = await supabase.from("images").insert([{
+      url: finalUrl,
+      additional_context: uploadForm.additional_context || null,
+      image_description: uploadForm.image_description || null,
+      is_public: uploadForm.is_public,
+      is_common_use: uploadForm.is_common_use,
+    }]);
+
+    if (insertError) {
+      toast("Error: " + insertError.message);
+    } else {
+      setShowUpload(false);
+      setUploadForm({ file: null, url: "", additional_context: "", image_description: "", is_public: true, is_common_use: false });
+      await load();
+      toast("Image uploaded!");
+    }
+    setUploading(false);
+  }
+
   const filtered = images.filter((img) => {
     if (filter === "public" && !img.is_public) return false;
     if (filter === "common" && !img.is_common_use) return false;
@@ -109,6 +172,73 @@ export default function ImagesPage() {
 
   return (
     <div style={{ padding: "36px 40px" }}>
+      {/* Upload Modal */}
+      {showUpload && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "#fff", borderRadius: 16, padding: 32, width: 500, maxWidth: "90vw", maxHeight: "85vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#111", margin: "0 0 20px" }}>Upload Image</h2>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.45)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 5 }}>File</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setUploadForm((f) => ({ ...f, file: e.target.files?.[0] ?? null }))}
+                style={{ width: "100%", fontSize: 13 }}
+              />
+            </div>
+
+            <div style={{ textAlign: "center", fontSize: 12, color: "rgba(0,0,0,0.35)", margin: "8px 0" }}>— or paste a URL —</div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.45)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 5 }}>Image URL</label>
+              <input
+                value={uploadForm.url}
+                onChange={(e) => setUploadForm((f) => ({ ...f, url: e.target.value }))}
+                placeholder="https://…"
+                style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 13, outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.45)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 5 }}>Additional Context</label>
+              <input
+                value={uploadForm.additional_context}
+                onChange={(e) => setUploadForm((f) => ({ ...f, additional_context: e.target.value }))}
+                style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 13, outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.45)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 5 }}>Description</label>
+              <input
+                value={uploadForm.image_description}
+                onChange={(e) => setUploadForm((f) => ({ ...f, image_description: e.target.value }))}
+                style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 13, outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: 20, marginBottom: 20 }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer" }}>
+                <input type="checkbox" checked={uploadForm.is_public} onChange={(e) => setUploadForm((f) => ({ ...f, is_public: e.target.checked }))} />
+                Public
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer" }}>
+                <input type="checkbox" checked={uploadForm.is_common_use} onChange={(e) => setUploadForm((f) => ({ ...f, is_common_use: e.target.checked }))} />
+                Common Use
+              </label>
+            </div>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={handleUpload} disabled={uploading} style={{ flex: 1, padding: "10px 0", background: "#111", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: uploading ? "not-allowed" : "pointer", opacity: uploading ? 0.5 : 1 }}>
+                {uploading ? "Uploading…" : "Upload"}
+              </button>
+              <button onClick={() => setShowUpload(false)} style={{ flex: 1, padding: "10px 0", background: "#f3f4f6", color: "#111", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toast */}
       {toasting && (
         <div
@@ -157,6 +287,12 @@ export default function ImagesPage() {
           </p>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <button
+            onClick={() => setShowUpload(true)}
+            style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: "#111", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+          >
+            + Upload
+          </button>
           {(["all", "public", "common"] as const).map((f) => (
             <button
               key={f}
