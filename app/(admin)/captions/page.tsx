@@ -55,7 +55,7 @@ export default function CaptionsPage() {
     if (filter === "featured") countQ = countQ.eq("is_featured", true);
     if (filter === "public") countQ = countQ.eq("is_public", true);
 
-    let dataQ = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles(email, first_name, last_name), images(url)").order("created_datetime_utc", { ascending: false });
+    let dataQ = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles!profile_id(email, first_name, last_name), images!image_id(url)").order("created_datetime_utc", { ascending: false });
     if (filter === "featured") dataQ = dataQ.eq("is_featured", true);
     if (filter === "public") dataQ = dataQ.eq("is_public", true);
 
@@ -68,7 +68,7 @@ export default function CaptionsPage() {
 
   async function loadMore() {
     setLoadingMore(true);
-    let q = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles(email, first_name, last_name), images(url)").order("created_datetime_utc", { ascending: false });
+    let q = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles!profile_id(email, first_name, last_name), images!image_id(url)").order("created_datetime_utc", { ascending: false });
     if (filter === "featured") q = q.eq("is_featured", true);
     if (filter === "public") q = q.eq("is_public", true);
     const { data, error } = await q.range(captions.length, captions.length + PAGE - 1);

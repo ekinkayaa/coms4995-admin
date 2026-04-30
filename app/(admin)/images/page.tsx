@@ -47,7 +47,7 @@ export default function ImagesPage() {
   const supabase = createClient();
 
   const buildQuery = useCallback(() => {
-    let q = supabase.from("images").select("id, url, additional_context, image_description, is_public, is_common_use, created_datetime_utc, profile_id, profiles(email, first_name, last_name)");
+    let q = supabase.from("images").select("id, url, additional_context, image_description, is_public, is_common_use, created_datetime_utc, profile_id, profiles!profile_id(email, first_name, last_name)");
     if (filter === "public") q = q.eq("is_public", true);
     if (filter === "common") q = q.eq("is_common_use", true);
     if (search) q = q.ilike("additional_context", `%${search}%`);

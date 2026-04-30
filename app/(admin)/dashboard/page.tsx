@@ -123,7 +123,7 @@ export default async function DashboardPage() {
       .select("*", { count: "exact", head: true }),
     supabase
       .from("captions")
-      .select("id, content, like_count, profiles(email, first_name, last_name)")
+      .select("id, content, like_count, profiles!profile_id(email, first_name, last_name)")
       .order("like_count", { ascending: false })
       .limit(10),
     supabase
@@ -133,7 +133,7 @@ export default async function DashboardPage() {
       .limit(6),
     supabase
       .from("images")
-      .select("profile_id, profiles(email, first_name, last_name)")
+      .select("profile_id, profiles!profile_id(email, first_name, last_name)")
       .limit(2000),
     supabase.from("bug_reports").select("*", { count: "exact", head: true }),
     supabase
