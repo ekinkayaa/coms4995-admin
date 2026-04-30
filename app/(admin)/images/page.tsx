@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-client";
 
 type Image = {
@@ -46,27 +46,31 @@ export default function ImagesPage() {
   const [uploadForm, setUploadForm] = useState({ file: null as File | null, url: "", additional_context: "", image_description: "", is_public: true, is_common_use: false });
   const supabase = createClient();
 
-  const buildQuery = useCallback(() => {
-    let q = supabase.from("images").select("id, url, additional_context, image_description, is_public, is_common_use, created_datetime_utc, profile_id, profiles!profile_id(email, first_name, last_name)");
-    if (filter === "public") q = q.eq("is_public", true);
-    if (filter === "common") q = q.eq("is_common_use", true);
-    if (search) q = q.or(`additional_context.ilike.%${search}%,image_description.ilike.%${search}%`);
-    return q.order("created_datetime_utc", { ascending: false });
-  }, [filter, search]);
+  async function getSearchProfileIds(): Promise<string[]> {
+    if (!search.trim()) return [];
+    const { data } = await supabase.from("profiles").select("id")
+      .or(`email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
+    return (data ?? []).map((p: any) => p.id);
+  }
 
-  const buildCountQuery = useCallback(() => {
-    let q = supabase.from("images").select("*", { count: "exact", head: true });
+  function applyFilters(q: any, profileIds: string[]) {
     if (filter === "public") q = q.eq("is_public", true);
     if (filter === "common") q = q.eq("is_common_use", true);
-    if (search) q = q.or(`additional_context.ilike.%${search}%,image_description.ilike.%${search}%`);
+    if (search.trim()) {
+      const conditions = [`additional_context.ilike.%${search}%`, `image_description.ilike.%${search}%`];
+      if (profileIds.length > 0) conditions.push(`profile_id.in.(${profileIds.join(",")})`);
+      q = q.or(conditions.join(","));
+    }
     return q;
-  }, [filter, search]);
+  }
 
   async function load() {
     setLoading(true);
+    const profileIds = await getSearchProfileIds();
     const [countRes, dataRes] = await Promise.all([
-      buildCountQuery(),
-      buildQuery().range(0, PAGE - 1),
+      applyFilters(supabase.from("images").select("*", { count: "exact", head: true }), profileIds),
+      applyFilters(supabase.from("images").select("id, url, additional_context, image_description, is_public, is_common_use, created_datetime_utc, profile_id, profiles!profile_id(email, first_name, last_name)"), profileIds)
+        .order("created_datetime_utc", { ascending: false }).range(0, PAGE - 1),
     ]);
     setTotalCount(countRes.count ?? 0);
     if (dataRes.error) setError(dataRes.error.message);
@@ -76,7 +80,11 @@ export default function ImagesPage() {
 
   async function loadMore() {
     setLoadingMore(true);
-    const { data, error } = await buildQuery().range(images.length, images.length + PAGE - 1);
+    const profileIds = await getSearchProfileIds();
+    const { data, error } = await applyFilters(
+      supabase.from("images").select("id, url, additional_context, image_description, is_public, is_common_use, created_datetime_utc, profile_id, profiles!profile_id(email, first_name, last_name)"),
+      profileIds
+    ).order("created_datetime_utc", { ascending: false }).range(images.length, images.length + PAGE - 1);
     if (error) toast("Error: " + error.message);
     else setImages((prev) => [...prev, ...(data ?? []) as unknown as Image[]]);
     setLoadingMore(false);

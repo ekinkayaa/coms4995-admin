@@ -57,15 +57,37 @@ export default function CaptionsPage() {
     return q.order("like_count", { ascending: true });
   }
 
+  async function getSearchProfileIds(): Promise<string[]> {
+    if (!search.trim()) return [];
+    const { data } = await supabase.from("profiles").select("id")
+      .or(`email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
+    return (data ?? []).map((p: any) => p.id);
+  }
+
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  function applySearch(q: any, profileIds: string[]) {
+    if (!search.trim()) return q;
+    const s = search.trim();
+    const conditions = [`content.ilike.%${s}%`];
+    if (UUID_RE.test(s)) conditions.push(`id.eq.${s}`);
+    if (profileIds.length > 0) conditions.push(`profile_id.in.(${profileIds.join(",")})`);
+    return q.or(conditions.join(","));
+  }
+
   async function load() {
     setLoading(true);
+    const profileIds = await getSearchProfileIds();
+
     let countQ = supabase.from("captions").select("*", { count: "exact", head: true });
     if (filter === "featured") countQ = countQ.eq("is_featured", true);
     if (filter === "public") countQ = countQ.eq("is_public", true);
+    countQ = applySearch(countQ, profileIds);
 
     let dataQ = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles!profile_id(email, first_name, last_name), images!image_id(url)");
     if (filter === "featured") dataQ = dataQ.eq("is_featured", true);
     if (filter === "public") dataQ = dataQ.eq("is_public", true);
+    dataQ = applySearch(dataQ, profileIds);
     dataQ = applyOrder(dataQ);
 
     const [countRes, dataRes] = await Promise.all([countQ, dataQ.range(0, PAGE - 1)]);
@@ -77,9 +99,11 @@ export default function CaptionsPage() {
 
   async function loadMore() {
     setLoadingMore(true);
+    const profileIds = await getSearchProfileIds();
     let q = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles!profile_id(email, first_name, last_name), images!image_id(url)");
     if (filter === "featured") q = q.eq("is_featured", true);
     if (filter === "public") q = q.eq("is_public", true);
+    q = applySearch(q, profileIds);
     q = applyOrder(q);
     const { data, error } = await q.range(captions.length, captions.length + PAGE - 1);
     if (error) toast("Error: " + error.message);
@@ -89,7 +113,7 @@ export default function CaptionsPage() {
 
   useEffect(() => {
     load();
-  }, [filter, sort]);
+  }, [filter, sort, search]);
 
   // Pre-fill search from URL param (e.g. ?search=caption_id from Reported Content)
   useEffect(() => {
@@ -149,12 +173,7 @@ export default function CaptionsPage() {
   const filtered = captions.filter((c) => {
     if (filter === "featured" && !c.is_featured) return false;
     if (filter === "public" && !c.is_public) return false;
-    const q = search.toLowerCase();
-    return (
-      !q ||
-      c.content?.toLowerCase().includes(q) ||
-      c.profiles?.email?.toLowerCase().includes(q)
-    );
+    return true;
   });
 
   return (
