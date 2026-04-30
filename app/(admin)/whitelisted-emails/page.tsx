@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase-client";
 type Row = Record<string, unknown>;
 
 const AUTO_COLS = new Set(["id", "created_at", "updated_at", "created_datetime_utc", "updated_datetime_utc"]);
+const HIDDEN_COLS = new Set(["created_by_user_id", "modified_by_user_id", "modified_datetime_utc"]);
 
 function formatVal(v: unknown): string {
   if (v === null || v === undefined) return "—";
@@ -34,7 +35,7 @@ export default function WhitelistedEmailsPage() {
     if (error) setError(error.message);
     else {
       setRows(data ?? []);
-      if (data && data.length > 0) setCols(Object.keys(data[0]));
+      if (data && data.length > 0) setCols(Object.keys(data[0]).filter((c) => !HIDDEN_COLS.has(c)));
     }
     setLoading(false);
   }
