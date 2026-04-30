@@ -12,13 +12,14 @@ function isEditable(col: string): boolean {
 }
 
 export default function HumorMixPage() {
-  const [rows, setRows] = useState<Row[]>([]);
+  const [allRows, setAllRows] = useState<Row[]>([]);
   const [cols, setCols] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toasting, setToasting] = useState<string | null>(null);
   const [editing, setEditing] = useState<{ id: unknown; form: Row } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
   const supabase = createClient();
 
   async function load() {
@@ -27,16 +28,21 @@ export default function HumorMixPage() {
       .from("humor_flavor_mix")
       .select("*")
       .order("id", { ascending: true })
-      .limit(200);
+      .limit(5000);
     if (error) setError(error.message);
     else {
-      setRows(data ?? []);
-      if (data && data.length > 0) setCols(Object.keys(data[0]));
+      const d = data ?? [];
+      setAllRows(d);
+      if (d.length > 0) setCols(Object.keys(d[0]));
     }
     setLoading(false);
   }
 
   useEffect(() => { load(); }, []);
+
+  const rows = allRows.filter((r) =>
+    !search || Object.values(r).some((v) => String(v ?? "").toLowerCase().includes(search.toLowerCase()))
+  );
 
   function toast(msg: string) {
     setToasting(msg);
@@ -62,7 +68,7 @@ export default function HumorMixPage() {
     if (error) {
       toast("Error: " + error.message);
     } else {
-      setRows((prev) => prev.map((r) => r.id === editing.id ? { ...r, ...editing.form } : r));
+      setAllRows((prev) => prev.map((r) => r.id === editing.id ? { ...r, ...editing.form } : r));
       setEditing(null);
       toast("Saved!");
     }
@@ -103,9 +109,19 @@ export default function HumorMixPage() {
         </div>
       )}
 
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: "#111", margin: "0 0 6px", letterSpacing: "-0.01em" }}>Humor Mix</h1>
-        <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>{rows.length} record{rows.length !== 1 ? "s" : ""}</p>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28, gap: 16, flexWrap: "wrap" }}>
+        <div>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: "#111", margin: "0 0 6px", letterSpacing: "-0.01em" }}>Humor Mix</h1>
+          <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>
+            {loading ? "Loading…" : `${rows.length.toLocaleString()} of ${allRows.length.toLocaleString()} record${allRows.length !== 1 ? "s" : ""}`}
+          </p>
+        </div>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search…"
+          style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 13, outline: "none", width: 220, background: "#fff" }}
+        />
       </div>
 
       {error && (

@@ -15,40 +15,31 @@ function formatVal(v: unknown): string {
 }
 
 export default function HumorFlavorStepsPage() {
-  const [rows, setRows] = useState<Row[]>([]);
+  const [allRows, setAllRows] = useState<Row[]>([]);
   const [cols, setCols] = useState<string[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const supabase = createClient();
-  const PAGE = 100;
 
   useEffect(() => {
     (async () => {
-      const [countRes, dataRes] = await Promise.all([
-        supabase.from("humor_flavor_steps").select("*", { count: "exact", head: true }),
-        supabase.from("humor_flavor_steps").select("*").order("id", { ascending: true }).range(0, PAGE - 1),
-      ]);
-      setTotalCount(countRes.count ?? 0);
-      if (dataRes.error) setError(dataRes.error.message);
+      const { data, error } = await supabase
+        .from("humor_flavor_steps")
+        .select("*")
+        .order("id", { ascending: true })
+        .limit(5000);
+      if (error) setError(error.message);
       else {
-        setRows(dataRes.data ?? []);
-        if (dataRes.data && dataRes.data.length > 0) setCols(Object.keys(dataRes.data[0]));
+        const d = data ?? [];
+        setAllRows(d);
+        if (d.length > 0) setCols(Object.keys(d[0]));
       }
       setLoading(false);
     })();
   }, []);
 
-  async function loadMore() {
-    setLoadingMore(true);
-    const { data } = await supabase.from("humor_flavor_steps").select("*").order("id", { ascending: true }).range(rows.length, rows.length + PAGE - 1);
-    if (data) setRows((prev) => [...prev, ...data]);
-    setLoadingMore(false);
-  }
-
-  const filtered = rows.filter((r) =>
+  const filtered = allRows.filter((r) =>
     !search || Object.values(r).some((v) => String(v ?? "").toLowerCase().includes(search.toLowerCase()))
   );
 
@@ -60,7 +51,7 @@ export default function HumorFlavorStepsPage() {
             Humor Flavor Steps
           </h1>
           <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>
-            {loading ? "Loading…" : `Showing ${rows.length.toLocaleString()} of ${totalCount.toLocaleString()} steps`}
+            {loading ? "Loading…" : `${filtered.length.toLocaleString()} of ${allRows.length.toLocaleString()} steps`}
           </p>
         </div>
         <input
@@ -114,13 +105,6 @@ export default function HumorFlavorStepsPage() {
         )}
       </div>
 
-      {rows.length < totalCount && (
-        <div style={{ textAlign: "center", marginTop: 20 }}>
-          <button onClick={loadMore} disabled={loadingMore} style={{ padding: "10px 28px", borderRadius: 8, border: "1px solid #e5e7eb", background: "#fff", color: "#111", fontSize: 13, fontWeight: 600, cursor: loadingMore ? "not-allowed" : "pointer", opacity: loadingMore ? 0.6 : 1 }}>
-            {loadingMore ? "Loading…" : `Load More (${(totalCount - rows.length).toLocaleString()} remaining)`}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
