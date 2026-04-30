@@ -35,9 +35,13 @@ function Badge({ on, label, color = "#16a34a" }: { on: boolean; label: string; c
   );
 }
 
+const PAGE = 100;
+
 export default function CaptionsPage() {
   const [captions, setCaptions] = useState<Caption[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "featured" | "public">("all");
   const [error, setError] = useState<string | null>(null);
@@ -47,21 +51,35 @@ export default function CaptionsPage() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("captions")
-      .select(
-        "id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles(email, first_name, last_name), images(url)"
-      )
-      .order("created_datetime_utc", { ascending: false })
-      .limit(300);
-    if (error) setError(error.message);
-    else setCaptions((data ?? []) as unknown as Caption[]);
+    let countQ = supabase.from("captions").select("*", { count: "exact", head: true });
+    if (filter === "featured") countQ = countQ.eq("is_featured", true);
+    if (filter === "public") countQ = countQ.eq("is_public", true);
+
+    let dataQ = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles(email, first_name, last_name), images(url)").order("created_datetime_utc", { ascending: false });
+    if (filter === "featured") dataQ = dataQ.eq("is_featured", true);
+    if (filter === "public") dataQ = dataQ.eq("is_public", true);
+
+    const [countRes, dataRes] = await Promise.all([countQ, dataQ.range(0, PAGE - 1)]);
+    setTotalCount(countRes.count ?? 0);
+    if (dataRes.error) setError(dataRes.error.message);
+    else setCaptions((dataRes.data ?? []) as unknown as Caption[]);
     setLoading(false);
+  }
+
+  async function loadMore() {
+    setLoadingMore(true);
+    let q = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles(email, first_name, last_name), images(url)").order("created_datetime_utc", { ascending: false });
+    if (filter === "featured") q = q.eq("is_featured", true);
+    if (filter === "public") q = q.eq("is_public", true);
+    const { data, error } = await q.range(captions.length, captions.length + PAGE - 1);
+    if (error) toast("Error: " + error.message);
+    else setCaptions((prev) => [...prev, ...(data ?? []) as unknown as Caption[]]);
+    setLoadingMore(false);
   }
 
   useEffect(() => {
     load();
-  }, []);
+  }, [filter]);
 
   function toast(msg: string) {
     setToasting(msg);
@@ -168,7 +186,7 @@ export default function CaptionsPage() {
             Captions
           </h1>
           <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>
-            {captions.length} caption{captions.length !== 1 ? "s" : ""}
+            {loading ? "Loading…" : `Showing ${captions.length.toLocaleString()} of ${totalCount.toLocaleString()}`}
           </p>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -386,6 +404,14 @@ export default function CaptionsPage() {
           </table>
         )}
       </div>
+
+      {captions.length < totalCount && (
+        <div style={{ textAlign: "center", marginTop: 20 }}>
+          <button onClick={loadMore} disabled={loadingMore} style={{ padding: "10px 28px", borderRadius: 8, border: "1px solid #e5e7eb", background: "#fff", color: "#111", fontSize: 13, fontWeight: 600, cursor: loadingMore ? "not-allowed" : "pointer", opacity: loadingMore ? 0.6 : 1 }}>
+            {loadingMore ? "Loading…" : `Load More (${(totalCount - captions.length).toLocaleString()} remaining)`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

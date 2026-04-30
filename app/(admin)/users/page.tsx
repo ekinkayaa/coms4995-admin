@@ -41,9 +41,13 @@ function Badge({
   );
 }
 
+const PAGE = 100;
+
 export default function UsersPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [toasting, setToasting] = useState<string | null>(null);
@@ -51,16 +55,22 @@ export default function UsersPage() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("profiles")
-      .select(
-        "id, email, first_name, last_name, is_superadmin, is_in_study, is_matrix_admin, created_datetime_utc"
-      )
-      .order("created_datetime_utc", { ascending: false })
-      .limit(500);
-    if (error) setError(error.message);
-    else setProfiles((data ?? []) as Profile[]);
+    const [countRes, dataRes] = await Promise.all([
+      supabase.from("profiles").select("*", { count: "exact", head: true }),
+      supabase.from("profiles").select("id, email, first_name, last_name, is_superadmin, is_in_study, is_matrix_admin, created_datetime_utc").order("created_datetime_utc", { ascending: false }).range(0, PAGE - 1),
+    ]);
+    setTotalCount(countRes.count ?? 0);
+    if (dataRes.error) setError(dataRes.error.message);
+    else setProfiles((dataRes.data ?? []) as Profile[]);
     setLoading(false);
+  }
+
+  async function loadMore() {
+    setLoadingMore(true);
+    const { data, error } = await supabase.from("profiles").select("id, email, first_name, last_name, is_superadmin, is_in_study, is_matrix_admin, created_datetime_utc").order("created_datetime_utc", { ascending: false }).range(profiles.length, profiles.length + PAGE - 1);
+    if (error) { setToasting("Error: " + error.message); setTimeout(() => setToasting(null), 2500); }
+    else setProfiles((prev) => [...prev, ...(data ?? []) as Profile[]]);
+    setLoadingMore(false);
   }
 
   useEffect(() => {
@@ -143,7 +153,7 @@ export default function UsersPage() {
             Users
           </h1>
           <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>
-            {profiles.length} profile{profiles.length !== 1 ? "s" : ""}
+            {loading ? "Loading…" : `Showing ${profiles.length.toLocaleString()} of ${totalCount.toLocaleString()}`}
           </p>
         </div>
         <input
@@ -368,6 +378,14 @@ export default function UsersPage() {
           </table>
         )}
       </div>
+
+      {profiles.length < totalCount && (
+        <div style={{ textAlign: "center", marginTop: 20 }}>
+          <button onClick={loadMore} disabled={loadingMore} style={{ padding: "10px 28px", borderRadius: 8, border: "1px solid #e5e7eb", background: "#fff", color: "#111", fontSize: 13, fontWeight: 600, cursor: loadingMore ? "not-allowed" : "pointer", opacity: loadingMore ? 0.6 : 1 }}>
+            {loadingMore ? "Loading…" : `Load More (${(totalCount - profiles.length).toLocaleString()} remaining)`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
