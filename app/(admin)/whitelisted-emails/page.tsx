@@ -30,7 +30,7 @@ export default function WhitelistedEmailsPage() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase.from("whitelisted_email_addresses").select("*").order("id", { ascending: true }).limit(500);
+    const { data, error } = await supabase.from("whitelist_email_addresses").select("*").order("id", { ascending: true }).limit(500);
     if (error) setError(error.message);
     else {
       setRows(data ?? []);
@@ -60,11 +60,11 @@ export default function WhitelistedEmailsPage() {
     if (!modal) return;
     setSaving(true);
     if (modal.mode === "create") {
-      const { error } = await supabase.from("whitelisted_email_addresses").insert([modal.form]);
+      const { error } = await supabase.from("whitelist_email_addresses").insert([modal.form]);
       if (error) toast("Error: " + error.message);
       else { await load(); setModal(null); toast("Email added!"); }
     } else {
-      const { error } = await supabase.from("whitelisted_email_addresses").update(modal.form).eq("id", modal.id);
+      const { error } = await supabase.from("whitelist_email_addresses").update(modal.form).eq("id", modal.id);
       if (error) toast("Error: " + error.message);
       else { setRows((prev) => prev.map((r) => r.id === modal.id ? { ...r, ...modal.form } : r)); setModal(null); toast("Saved!"); }
     }
@@ -74,7 +74,7 @@ export default function WhitelistedEmailsPage() {
   async function handleDelete(id: unknown) {
     if (!confirm("Remove this email from the whitelist?")) return;
     setDeleting(id);
-    const { error } = await supabase.from("whitelisted_email_addresses").delete().eq("id", id);
+    const { error } = await supabase.from("whitelist_email_addresses").delete().eq("id", id);
     if (error) toast("Error: " + error.message);
     else { setRows((prev) => prev.filter((r) => r.id !== id)); toast("Removed"); }
     setDeleting(null);

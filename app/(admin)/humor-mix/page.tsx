@@ -24,7 +24,7 @@ export default function HumorMixPage() {
   async function load() {
     setLoading(true);
     const { data, error } = await supabase
-      .from("humor_mix")
+      .from("humor_flavor_mix")
       .select("*")
       .order("id", { ascending: true })
       .limit(200);
@@ -56,7 +56,7 @@ export default function HumorMixPage() {
     if (!editing) return;
     setSaving(true);
     const { error } = await supabase
-      .from("humor_mix")
+      .from("humor_flavor_mix")
       .update(editing.form)
       .eq("id", editing.id);
     if (error) {

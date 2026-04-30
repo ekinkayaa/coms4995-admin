@@ -25,7 +25,7 @@ export default function LlmResponsesPage() {
   useEffect(() => {
     (async () => {
       const { data, error } = await supabase
-        .from("llm_responses")
+        .from("llm_model_responses")
         .select("*")
         .order("id", { ascending: false })
         .limit(200);
