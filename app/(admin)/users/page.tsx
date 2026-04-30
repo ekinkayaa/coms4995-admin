@@ -49,6 +49,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"all" | "superadmin" | "matrix_admin" | "in_study">("all");
   const [error, setError] = useState<string | null>(null);
   const [toasting, setToasting] = useState<string | null>(null);
   const supabase = createClient();
@@ -100,14 +101,21 @@ export default function UsersPage() {
     setTimeout(() => setToasting(null), 2500);
   }
 
-  const filtered = profiles.filter((p) => {
-    const q = search.toLowerCase();
-    return (
-      p.email?.toLowerCase().includes(q) ||
-      p.first_name?.toLowerCase().includes(q) ||
-      p.last_name?.toLowerCase().includes(q)
-    );
-  });
+  const filtered = profiles
+    .filter((p) => {
+      if (roleFilter === "superadmin" && !p.is_superadmin) return false;
+      if (roleFilter === "matrix_admin" && !p.is_matrix_admin) return false;
+      if (roleFilter === "in_study" && !p.is_in_study) return false;
+      const q = search.toLowerCase();
+      return !q || p.email?.toLowerCase().includes(q) || p.first_name?.toLowerCase().includes(q) || p.last_name?.toLowerCase().includes(q);
+    })
+    .sort((a, b) => {
+      if (roleFilter !== "all") return 0;
+      // Default: superadmins first, then matrix admins, then rest
+      const aScore = (a.is_superadmin ? 2 : 0) + (a.is_matrix_admin ? 1 : 0);
+      const bScore = (b.is_superadmin ? 2 : 0) + (b.is_matrix_admin ? 1 : 0);
+      return bScore - aScore;
+    });
 
   return (
     <div style={{ padding: "36px 40px" }}>
@@ -156,20 +164,19 @@ export default function UsersPage() {
             {loading ? "Loading…" : `Showing ${profiles.length.toLocaleString()} of ${totalCount.toLocaleString()}`}
           </p>
         </div>
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name or email…"
-          style={{
-            padding: "10px 16px",
-            borderRadius: 10,
-            border: "1px solid #e5e7eb",
-            fontSize: 14,
-            outline: "none",
-            width: 280,
-            background: "#fff",
-          }}
-        />
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          {(["all", "superadmin", "matrix_admin", "in_study"] as const).map((r) => (
+            <button key={r} onClick={() => setRoleFilter(r)} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid", borderColor: roleFilter === r ? "#7c5cbf" : "#e5e7eb", background: roleFilter === r ? "#7c5cbf" : "#fff", color: roleFilter === r ? "#fff" : "#111", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+              {r === "all" ? "All" : r === "superadmin" ? "Superadmin" : r === "matrix_admin" ? "Matrix Admin" : "In Study"}
+            </button>
+          ))}
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name or email…"
+            style={{ padding: "10px 16px", borderRadius: 10, border: "1px solid #e5e7eb", fontSize: 14, outline: "none", width: 240, background: "#fff" }}
+          />
+        </div>
       </div>
 
       {error && (

@@ -44,10 +44,18 @@ export default function CaptionsPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "featured" | "public">("all");
+  const [sort, setSort] = useState<"newest" | "oldest" | "most_liked" | "least_liked">("newest");
   const [error, setError] = useState<string | null>(null);
   const [toasting, setToasting] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const supabase = createClient();
+
+  function applyOrder(q: any) {
+    if (sort === "newest") return q.order("created_datetime_utc", { ascending: false });
+    if (sort === "oldest") return q.order("created_datetime_utc", { ascending: true });
+    if (sort === "most_liked") return q.order("like_count", { ascending: false });
+    return q.order("like_count", { ascending: true });
+  }
 
   async function load() {
     setLoading(true);
@@ -55,9 +63,10 @@ export default function CaptionsPage() {
     if (filter === "featured") countQ = countQ.eq("is_featured", true);
     if (filter === "public") countQ = countQ.eq("is_public", true);
 
-    let dataQ = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles!profile_id(email, first_name, last_name), images!image_id(url)").order("created_datetime_utc", { ascending: false });
+    let dataQ = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles!profile_id(email, first_name, last_name), images!image_id(url)");
     if (filter === "featured") dataQ = dataQ.eq("is_featured", true);
     if (filter === "public") dataQ = dataQ.eq("is_public", true);
+    dataQ = applyOrder(dataQ);
 
     const [countRes, dataRes] = await Promise.all([countQ, dataQ.range(0, PAGE - 1)]);
     setTotalCount(countRes.count ?? 0);
@@ -68,9 +77,10 @@ export default function CaptionsPage() {
 
   async function loadMore() {
     setLoadingMore(true);
-    let q = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles!profile_id(email, first_name, last_name), images!image_id(url)").order("created_datetime_utc", { ascending: false });
+    let q = supabase.from("captions").select("id, content, is_public, is_featured, like_count, created_datetime_utc, profile_id, image_id, profiles!profile_id(email, first_name, last_name), images!image_id(url)");
     if (filter === "featured") q = q.eq("is_featured", true);
     if (filter === "public") q = q.eq("is_public", true);
+    q = applyOrder(q);
     const { data, error } = await q.range(captions.length, captions.length + PAGE - 1);
     if (error) toast("Error: " + error.message);
     else setCaptions((prev) => [...prev, ...(data ?? []) as unknown as Caption[]]);
@@ -79,7 +89,7 @@ export default function CaptionsPage() {
 
   useEffect(() => {
     load();
-  }, [filter]);
+  }, [filter, sort]);
 
   // Pre-fill search from URL param (e.g. ?search=caption_id from Reported Content)
   useEffect(() => {
@@ -198,22 +208,14 @@ export default function CaptionsPage() {
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {(["all", "featured", "public"] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 8,
-                border: "1px solid",
-                borderColor: filter === f ? "#111" : "#e5e7eb",
-                background: filter === f ? "#111" : "#fff",
-                color: filter === f ? "#fff" : "#111",
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
+            <button key={f} onClick={() => setFilter(f)} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid", borderColor: filter === f ? "#111" : "#e5e7eb", background: filter === f ? "#111" : "#fff", color: filter === f ? "#fff" : "#111", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
               {f === "all" ? "All" : f === "featured" ? "Featured" : "Public"}
+            </button>
+          ))}
+          <div style={{ width: 1, background: "#e5e7eb", alignSelf: "stretch" }} />
+          {(["newest", "oldest", "most_liked", "least_liked"] as const).map((s) => (
+            <button key={s} onClick={() => setSort(s)} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid", borderColor: sort === s ? "#4f46e5" : "#e5e7eb", background: sort === s ? "#4f46e5" : "#fff", color: sort === s ? "#fff" : "#111", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+              {s === "newest" ? "Newest" : s === "oldest" ? "Oldest" : s === "most_liked" ? "Most Liked" : "Least Liked"}
             </button>
           ))}
           <input
