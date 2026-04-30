@@ -51,23 +51,23 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 export default async function RatingsPage() {
   const supabase = await createClient();
 
-  const [votesRes, flavorsRes] = await Promise.all([
+  const [totalRes, upvoteRes, flavorsRes, votesRes] = await Promise.all([
+    supabase.from("caption_votes").select("*", { count: "exact", head: true }),
+    supabase.from("caption_votes").select("*", { count: "exact", head: true }).eq("vote_value", 1),
+    supabase.from("humor_flavors").select("id, slug").order("slug"),
     supabase
       .from("caption_votes")
-      .select("caption_id, vote_value, profile_id, captions(content, humor_flavor_id)"),
-    supabase
-      .from("humor_flavors")
-      .select("id, slug")
-      .order("slug"),
+      .select("caption_id, vote_value, profile_id, captions(content, humor_flavor_id)")
+      .range(0, 49999),
   ]);
 
   const votes = (votesRes.data ?? []) as unknown as VoteRow[];
   const flavors = (flavorsRes.data ?? []) as { id: number; slug: string }[];
 
-  // ── Summary ────────────────────────────────────────────────────
-  const total = votes.length;
-  const upvotes = votes.filter((v) => v.vote_value > 0).length;
-  const downvotes = votes.filter((v) => v.vote_value < 0).length;
+  // ── Summary (exact DB counts, bypasses row limit) ──────────────
+  const total = totalRes.count ?? 0;
+  const upvotes = upvoteRes.count ?? 0;
+  const downvotes = total - upvotes;
   const uniqueRaters = new Set(votes.map((v) => v.profile_id)).size;
   const uniqueCaptions = new Set(votes.map((v) => v.caption_id)).size;
   const upvotePct = total === 0 ? 0 : Math.round((upvotes / total) * 100);
