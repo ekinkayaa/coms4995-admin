@@ -71,7 +71,7 @@ export default async function ReportedContentPage() {
                     </span>
                   </td>
                   <td style={tdStyle}>
-                    <Link href={`/captions`} style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #e5e7eb", background: "#f9fafb", color: "#111", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
+                    <Link href={`/captions?search=${r.caption_id}`} style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #e5e7eb", background: "#f9fafb", color: "#111", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
                       View Caption
                     </Link>
                   </td>
@@ -120,9 +120,9 @@ export default async function ReportedContentPage() {
                     </span>
                   </td>
                   <td style={tdStyle}>
-                    <Link href={`/images`} style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #e5e7eb", background: "#f9fafb", color: "#111", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
-                      View Images
-                    </Link>
+                    <a href={(r.images as any)?.url ?? "/images"} target="_blank" rel="noreferrer" style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #e5e7eb", background: "#f9fafb", color: "#111", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
+                      View Image
+                    </a>
                   </td>
                 </tr>
               ))}

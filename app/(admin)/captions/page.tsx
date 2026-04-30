@@ -81,6 +81,13 @@ export default function CaptionsPage() {
     load();
   }, [filter]);
 
+  // Pre-fill search from URL param (e.g. ?search=caption_id from Reported Content)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const s = params.get("search");
+    if (s) setSearch(s);
+  }, []);
+
   function toast(msg: string) {
     setToasting(msg);
     setTimeout(() => setToasting(null), 2500);
