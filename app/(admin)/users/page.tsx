@@ -54,11 +54,17 @@ export default function UsersPage() {
   const [toasting, setToasting] = useState<string | null>(null);
   const supabase = createClient();
 
+  function applySearch(q: any) {
+    if (!search.trim()) return q;
+    const s = search.trim();
+    return q.or(`email.ilike.%${s}%,first_name.ilike.%${s}%,last_name.ilike.%${s}%`);
+  }
+
   async function load() {
     setLoading(true);
     const [countRes, dataRes] = await Promise.all([
-      supabase.from("profiles").select("*", { count: "exact", head: true }),
-      supabase.from("profiles").select("id, email, first_name, last_name, is_superadmin, is_in_study, is_matrix_admin, created_datetime_utc").order("created_datetime_utc", { ascending: false }).range(0, PAGE - 1),
+      applySearch(supabase.from("profiles").select("*", { count: "exact", head: true })),
+      applySearch(supabase.from("profiles").select("id, email, first_name, last_name, is_superadmin, is_in_study, is_matrix_admin, created_datetime_utc")).order("created_datetime_utc", { ascending: false }).range(0, PAGE - 1),
     ]);
     setTotalCount(countRes.count ?? 0);
     if (dataRes.error) setError(dataRes.error.message);
@@ -68,7 +74,7 @@ export default function UsersPage() {
 
   async function loadMore() {
     setLoadingMore(true);
-    const { data, error } = await supabase.from("profiles").select("id, email, first_name, last_name, is_superadmin, is_in_study, is_matrix_admin, created_datetime_utc").order("created_datetime_utc", { ascending: false }).range(profiles.length, profiles.length + PAGE - 1);
+    const { data, error } = await applySearch(supabase.from("profiles").select("id, email, first_name, last_name, is_superadmin, is_in_study, is_matrix_admin, created_datetime_utc")).order("created_datetime_utc", { ascending: false }).range(profiles.length, profiles.length + PAGE - 1);
     if (error) { setToasting("Error: " + error.message); setTimeout(() => setToasting(null), 2500); }
     else setProfiles((prev) => [...prev, ...(data ?? []) as Profile[]]);
     setLoadingMore(false);
@@ -76,7 +82,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [search]);
 
   async function toggleField(
     id: string,
@@ -106,8 +112,7 @@ export default function UsersPage() {
       if (roleFilter === "superadmin" && !p.is_superadmin) return false;
       if (roleFilter === "matrix_admin" && !p.is_matrix_admin) return false;
       if (roleFilter === "in_study" && !p.is_in_study) return false;
-      const q = search.toLowerCase();
-      return !q || p.email?.toLowerCase().includes(q) || p.first_name?.toLowerCase().includes(q) || p.last_name?.toLowerCase().includes(q);
+      return true;
     })
     .sort((a, b) => {
       if (roleFilter !== "all") return 0;

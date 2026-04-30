@@ -50,14 +50,22 @@ export default function ImagesPage() {
     let q = supabase.from("images").select("id, url, additional_context, image_description, is_public, is_common_use, created_datetime_utc, profile_id, profiles!profile_id(email, first_name, last_name)");
     if (filter === "public") q = q.eq("is_public", true);
     if (filter === "common") q = q.eq("is_common_use", true);
-    if (search) q = q.ilike("additional_context", `%${search}%`);
+    if (search) q = q.or(`additional_context.ilike.%${search}%,image_description.ilike.%${search}%`);
     return q.order("created_datetime_utc", { ascending: false });
+  }, [filter, search]);
+
+  const buildCountQuery = useCallback(() => {
+    let q = supabase.from("images").select("*", { count: "exact", head: true });
+    if (filter === "public") q = q.eq("is_public", true);
+    if (filter === "common") q = q.eq("is_common_use", true);
+    if (search) q = q.or(`additional_context.ilike.%${search}%,image_description.ilike.%${search}%`);
+    return q;
   }, [filter, search]);
 
   async function load() {
     setLoading(true);
     const [countRes, dataRes] = await Promise.all([
-      supabase.from("images").select("*", { count: "exact", head: true }),
+      buildCountQuery(),
       buildQuery().range(0, PAGE - 1),
     ]);
     setTotalCount(countRes.count ?? 0);
@@ -232,7 +240,7 @@ export default function ImagesPage() {
               {f === "all" ? "All" : f === "public" ? "Public" : "Common Use"}
             </button>
           ))}
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search context…" style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 13, outline: "none", width: 200, background: "#fff" }} />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search description…" style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 13, outline: "none", width: 200, background: "#fff" }} />
         </div>
       </div>
 
