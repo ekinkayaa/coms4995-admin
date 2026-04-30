@@ -22,18 +22,20 @@ export default function LlmPromptChainsPage() {
   const [search, setSearch] = useState("");
   const supabase = createClient();
 
+  const [total, setTotal] = useState<number | null>(null);
+
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
-        .from("llm_prompt_chains")
-        .select("*")
-        .order("id", { ascending: true })
-        .limit(200);
+      const [{ data, error }, { count }] = await Promise.all([
+        supabase.from("llm_prompt_chains").select("*").order("id", { ascending: true }).limit(200),
+        supabase.from("llm_prompt_chains").select("*", { count: "exact", head: true }),
+      ]);
       if (error) setError(error.message);
       else {
         setRows(data ?? []);
         if (data && data.length > 0) setCols(Object.keys(data[0]));
       }
+      setTotal(count ?? null);
       setLoading(false);
     })();
   }, []);
@@ -47,7 +49,10 @@ export default function LlmPromptChainsPage() {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28, gap: 16, flexWrap: "wrap" }}>
         <div>
           <h1 style={{ fontSize: 26, fontWeight: 800, color: "#111", margin: "0 0 6px", letterSpacing: "-0.01em" }}>LLM Prompt Chains</h1>
-          <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>{rows.length} chain{rows.length !== 1 ? "s" : ""}</p>
+          <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>
+            {total !== null ? `${total.toLocaleString()} total` : `${rows.length}`} chain{(total ?? rows.length) !== 1 ? "s" : ""}
+            {total !== null && rows.length < total ? ` · showing latest ${rows.length}` : ""}
+          </p>
         </div>
         <input
           value={search}

@@ -34,7 +34,7 @@ const NAV_GROUPS = [
       { href: "/llm-providers", label: "LLM Providers", icon: "◆" },
       { href: "/llm-models", label: "LLM Models", icon: "◇" },
       { href: "/llm-prompt-chains", label: "Prompt Chains", icon: "◈" },
-      { href: "/llm-responses", label: "LLM Responses", icon: "◉" },
+      { href: "/llm-responses", label: "LLM Call Log", icon: "◉" },
     ],
   },
   {

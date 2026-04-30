@@ -22,18 +22,20 @@ export default function LlmResponsesPage() {
   const [search, setSearch] = useState("");
   const supabase = createClient();
 
+  const [total, setTotal] = useState<number | null>(null);
+
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
-        .from("llm_model_responses")
-        .select("*")
-        .order("id", { ascending: false })
-        .limit(200);
+      const [{ data, error }, { count }] = await Promise.all([
+        supabase.from("llm_model_responses").select("*").order("id", { ascending: false }).limit(200),
+        supabase.from("llm_model_responses").select("*", { count: "exact", head: true }),
+      ]);
       if (error) setError(error.message);
       else {
         setRows(data ?? []);
         if (data && data.length > 0) setCols(Object.keys(data[0]));
       }
+      setTotal(count ?? null);
       setLoading(false);
     })();
   }, []);
@@ -46,8 +48,12 @@ export default function LlmResponsesPage() {
     <div style={{ padding: "36px 40px" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28, gap: 16, flexWrap: "wrap" }}>
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: "#111", margin: "0 0 6px", letterSpacing: "-0.01em" }}>LLM Responses</h1>
-          <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>{rows.length} response{rows.length !== 1 ? "s" : ""}</p>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: "#111", margin: "0 0 6px", letterSpacing: "-0.01em" }}>LLM Call Log</h1>
+          <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: "0 0 2px" }}>
+            {total !== null ? `${total.toLocaleString()} total` : `${rows.length}`} response{(total ?? rows.length) !== 1 ? "s" : ""}
+            {total !== null && rows.length < total ? ` · showing latest ${rows.length}` : ""}
+          </p>
+          <p style={{ fontSize: 12, color: "rgba(0,0,0,0.28)", margin: 0 }}>Raw log of every LLM API call made by the caption generation pipeline</p>
         </div>
         <input
           value={search}
