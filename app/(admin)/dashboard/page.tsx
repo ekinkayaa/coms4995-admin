@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase-server";
+import Link from "next/link";
 
 function StatCard({
   label,
@@ -198,52 +199,59 @@ export default async function DashboardPage() {
       {(totalReports > 0 || (bugReportCount ?? 0) > 0) && (
         <div style={{ marginBottom: 28, display: "flex", flexDirection: "column", gap: 10 }}>
           {totalReports > 0 && (
-            <div
-              style={{
-                background: "#fef2f2",
-                border: "1px solid #fecaca",
-                borderRadius: 10,
-                padding: "14px 20px",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-              }}
-            >
-              <span style={{ fontSize: 18 }}>⚠️</span>
-              <div>
-                <div
-                  style={{ fontSize: 14, fontWeight: 700, color: "#991b1b" }}
-                >
-                  {totalReports} pending content report
-                  {totalReports !== 1 ? "s" : ""}
+            <Link href="/reported-content" style={{ textDecoration: "none" }}>
+              <div
+                style={{
+                  background: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  borderRadius: 10,
+                  padding: "14px 20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  cursor: "pointer",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 18 }}>⚠️</span>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#991b1b" }}>
+                      {totalReports} pending content report{totalReports !== 1 ? "s" : ""}
+                    </div>
+                    <div style={{ fontSize: 12, color: "#b91c1c" }}>
+                      {reportedCaptionCount} caption{reportedCaptionCount !== 1 ? "s" : ""} · {reportedImageCount} image{reportedImageCount !== 1 ? "s" : ""}
+                    </div>
+                  </div>
                 </div>
-                <div style={{ fontSize: 12, color: "#b91c1c" }}>
-                  {reportedCaptionCount} caption
-                  {reportedCaptionCount !== 1 ? "s" : ""} ·{" "}
-                  {reportedImageCount} image
-                  {reportedImageCount !== 1 ? "s" : ""}
-                </div>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#991b1b" }}>Review →</span>
               </div>
-            </div>
+            </Link>
           )}
           {(bugReportCount ?? 0) > 0 && (
-            <div
-              style={{
-                background: "#fffbeb",
-                border: "1px solid #fde68a",
-                borderRadius: 10,
-                padding: "14px 20px",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-              }}
-            >
-              <span style={{ fontSize: 18 }}>🐛</span>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#92400e" }}>
-                {bugReportCount} bug report{bugReportCount !== 1 ? "s" : ""}{" "}
-                submitted
+            <Link href="/bug-reports" style={{ textDecoration: "none" }}>
+              <div
+                style={{
+                  background: "#fffbeb",
+                  border: "1px solid #fde68a",
+                  borderRadius: 10,
+                  padding: "14px 20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  cursor: "pointer",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 18 }}>🐛</span>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#92400e" }}>
+                    {bugReportCount} bug report{bugReportCount !== 1 ? "s" : ""} submitted
+                  </div>
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#92400e" }}>View All →</span>
               </div>
-            </div>
+            </Link>
           )}
         </div>
       )}

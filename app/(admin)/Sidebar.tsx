@@ -13,6 +13,8 @@ const NAV_GROUPS = [
       { href: "/images", label: "Images", icon: "▣" },
       { href: "/captions", label: "Captions", icon: "◎" },
       { href: "/ratings", label: "Caption Ratings", icon: "◈" },
+      { href: "/reported-content", label: "Reported Content", icon: "⚠" },
+      { href: "/bug-reports", label: "Bug Reports", icon: "🐛" },
       { href: "/caption-requests", label: "Caption Requests", icon: "◷" },
       { href: "/caption-examples", label: "Caption Examples", icon: "◑" },
       { href: "/terms", label: "Terms", icon: "◻" },
