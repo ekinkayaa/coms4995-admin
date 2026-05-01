@@ -60,7 +60,8 @@ export default function CaptionsPage() {
   async function getSearchProfileIds(): Promise<string[]> {
     if (!search.trim()) return [];
     const { data } = await supabase.from("profiles").select("id")
-      .or(`email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
+      .or(`email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`)
+      .limit(50);
     return (data ?? []).map((p: any) => p.id);
   }
 
