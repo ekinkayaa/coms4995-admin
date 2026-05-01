@@ -24,7 +24,7 @@ export default function CaptionExamplesPage() {
   const [toasting, setToasting] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<unknown>(null);
   const [saving, setSaving] = useState(false);
-  const [modal, setModal] = useState<{ mode: "create" | "edit"; id?: unknown; form: Row } | null>(null);
+  const [modal, setModal] = useState<{ id?: unknown; form: Row } | null>(null);
   const [search, setSearch] = useState("");
   const supabase = createClient();
 
@@ -46,34 +46,18 @@ export default function CaptionExamplesPage() {
     setTimeout(() => setToasting(null), 2500);
   }
 
-  function openCreate() {
-    const form: Row = {};
-    cols.filter((c) => !AUTO_COLS.has(c)).forEach((c) => { form[c] = ""; });
-    if (Object.keys(form).length === 0) {
-      form.image_id = "";
-      form.caption = "";
-    }
-    setModal({ mode: "create", form });
-  }
-
   function openEdit(row: Row) {
     const form: Row = {};
     cols.filter((c) => !AUTO_COLS.has(c)).forEach((c) => { form[c] = row[c] ?? ""; });
-    setModal({ mode: "edit", id: row.id, form });
+    setModal({ id: row.id, form });
   }
 
   async function handleSave() {
     if (!modal) return;
     setSaving(true);
-    if (modal.mode === "create") {
-      const { error } = await supabase.from("caption_examples").insert([modal.form]);
-      if (error) toast("Error: " + error.message);
-      else { await load(); setModal(null); toast("Created!"); }
-    } else {
-      const { error } = await supabase.from("caption_examples").update(modal.form).eq("id", modal.id);
-      if (error) toast("Error: " + error.message);
-      else { setRows((prev) => prev.map((r) => r.id === modal.id ? { ...r, ...modal.form } : r)); setModal(null); toast("Saved!"); }
-    }
+    const { error } = await supabase.from("caption_examples").update(modal.form).eq("id", modal.id);
+    if (error) toast("Error: " + error.message);
+    else { setRows((prev) => prev.map((r) => r.id === modal.id ? { ...r, ...modal.form } : r)); setModal(null); toast("Saved!"); }
     setSaving(false);
   }
 
@@ -101,9 +85,7 @@ export default function CaptionExamplesPage() {
       {modal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: "#fff", borderRadius: 16, padding: 32, width: 520, maxWidth: "90vw", maxHeight: "85vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#111", margin: "0 0 20px" }}>
-              {modal.mode === "create" ? "New Caption Example" : "Edit Caption Example"}
-            </h2>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#111", margin: "0 0 20px" }}>Edit Caption Example</h2>
             {Object.entries(modal.form).map(([k, v]) => (
               <div key={k} style={{ marginBottom: 14 }}>
                 <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.45)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 5 }}>{k}</label>
@@ -125,7 +107,7 @@ export default function CaptionExamplesPage() {
             ))}
             <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
               <button onClick={handleSave} disabled={saving} style={{ flex: 1, padding: "10px 0", background: "#111", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.5 : 1 }}>
-                {saving ? "Saving…" : modal.mode === "create" ? "Create" : "Save"}
+                {saving ? "Saving…" : "Save"}
               </button>
               <button onClick={() => setModal(null)} style={{ flex: 1, padding: "10px 0", background: "#f3f4f6", color: "#111", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
             </div>
@@ -140,7 +122,6 @@ export default function CaptionExamplesPage() {
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search…" style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 13, outline: "none", width: 200, background: "#fff" }} />
-          <button onClick={openCreate} style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: "#111", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ New</button>
         </div>
       </div>
 
