@@ -42,10 +42,10 @@ export default function BugReportsPage() {
   return (
     <div style={{ padding: "36px 40px" }}>
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: "#111", margin: "0 0 6px", letterSpacing: "-0.01em" }}>
+        <h1 style={{ fontSize: 26, fontWeight: 800, color: "var(--text-primary)", margin: "0 0 6px", letterSpacing: "-0.01em" }}>
           Bug Reports
         </h1>
-        <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>
+        <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>
           {loading ? "Loading…" : `${reports.length} report${reports.length !== 1 ? "s" : ""} submitted`}
         </p>
       </div>
@@ -57,13 +57,13 @@ export default function BugReportsPage() {
       )}
 
       {loading && (
-        <div style={{ padding: 48, textAlign: "center", color: "rgba(0,0,0,0.35)", fontSize: 14 }}>Loading…</div>
+        <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>Loading…</div>
       )}
 
       {!loading && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {reports.length === 0 ? (
-            <div style={{ background: "#fff", borderRadius: 14, padding: 48, textAlign: "center", color: "rgba(0,0,0,0.35)", fontSize: 14 }}>
+            <div style={{ background: "var(--bg-card)", borderRadius: 14, padding: 48, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>
               No bug reports yet.
             </div>
           ) : (
@@ -72,13 +72,13 @@ export default function BugReportsPage() {
               const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || profile?.email || "Unknown";
               const isOpen = expanded.has(r.id);
               return (
-                <div key={r.id} style={{ background: "#fff", borderRadius: 12, padding: "20px 24px" }}>
+                <div key={r.id} style={{ background: "var(--bg-card)", borderRadius: 12, padding: "20px 24px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: "#111", marginBottom: 3 }}>
-                        {r.subject || <span style={{ color: "rgba(0,0,0,0.35)", fontWeight: 400 }}>No subject</span>}
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 3 }}>
+                        {r.subject || <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>No subject</span>}
                       </div>
-                      <div style={{ fontSize: 12, color: "rgba(0,0,0,0.38)" }}>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
                         {name} · {r.created_datetime_utc ? new Date(r.created_datetime_utc).toLocaleString() : "—"}
                       </div>
                     </div>

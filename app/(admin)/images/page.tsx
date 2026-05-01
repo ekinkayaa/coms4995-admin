@@ -19,14 +19,14 @@ const PAGE = 100;
 
 function Badge({ on, label, color = "#16a34a" }: { on: boolean; label: string; color?: string }) {
   return (
-    <span style={{ display: "inline-block", padding: "2px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700, background: on ? color + "18" : "#f3f4f6", color: on ? color : "rgba(0,0,0,0.35)", letterSpacing: "0.04em" }}>
+    <span style={{ display: "inline-block", padding: "2px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700, background: on ? color + "18" : "var(--bg-muted)", color: on ? color : "var(--text-muted)", letterSpacing: "0.04em" }}>
       {label}
     </span>
   );
 }
 
-const inputStyle = { width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 13, outline: "none", boxSizing: "border-box" as const };
-const labelStyle = { display: "block" as const, fontSize: 11, fontWeight: 700 as const, color: "rgba(0,0,0,0.45)", letterSpacing: "0.06em", textTransform: "uppercase" as const, marginBottom: 5 };
+const inputStyle = { width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 13, outline: "none", boxSizing: "border-box" as const };
+const labelStyle = { display: "block" as const, fontSize: 11, fontWeight: 700 as const, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" as const, marginBottom: 5 };
 
 export default function ImagesPage() {
   const [images, setImages] = useState<Image[]>([]);
@@ -157,10 +157,10 @@ export default function ImagesPage() {
       {/* Edit Modal */}
       {editing && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#fff", borderRadius: 16, padding: 32, width: 480, maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+          <div style={{ background: "var(--bg-card)", borderRadius: 16, padding: 32, width: 480, maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
             <div style={{ display: "flex", gap: 16, marginBottom: 20, alignItems: "flex-start" }}>
               {editing.url && <img src={editing.url} alt="" style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />}
-              <h2 style={{ fontSize: 18, fontWeight: 800, color: "#111", margin: 0, paddingTop: 4 }}>Edit Image</h2>
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-primary)", margin: 0, paddingTop: 4 }}>Edit Image</h2>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
@@ -184,7 +184,7 @@ export default function ImagesPage() {
               <button onClick={handleSaveEdit} disabled={saving} style={{ flex: 1, padding: "10px 0", background: "#111", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.5 : 1 }}>
                 {saving ? "Saving…" : "Save"}
               </button>
-              <button onClick={() => setEditing(null)} style={{ flex: 1, padding: "10px 0", background: "#f3f4f6", color: "#111", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+              <button onClick={() => setEditing(null)} style={{ flex: 1, padding: "10px 0", background: "var(--bg-muted)", color: "var(--text-primary)", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
             </div>
           </div>
         </div>
@@ -193,13 +193,13 @@ export default function ImagesPage() {
       {/* Upload Modal */}
       {showUpload && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#fff", borderRadius: 16, padding: 32, width: 500, maxWidth: "90vw", maxHeight: "85vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#111", margin: "0 0 20px" }}>Upload Image</h2>
+          <div style={{ background: "var(--bg-card)", borderRadius: 16, padding: 32, width: 500, maxWidth: "90vw", maxHeight: "85vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: "var(--text-primary)", margin: "0 0 20px" }}>Upload Image</h2>
             <div style={{ marginBottom: 14 }}>
               <label style={labelStyle}>File</label>
               <input type="file" accept="image/*" onChange={(e) => setUploadForm((f) => ({ ...f, file: e.target.files?.[0] ?? null }))} style={{ width: "100%", fontSize: 13 }} />
             </div>
-            <div style={{ textAlign: "center", fontSize: 12, color: "rgba(0,0,0,0.35)", margin: "8px 0" }}>— or paste a URL —</div>
+            <div style={{ textAlign: "center", fontSize: 12, color: "var(--text-muted)", margin: "8px 0" }}>— or paste a URL —</div>
             <div style={{ marginBottom: 14 }}>
               <label style={labelStyle}>Image URL</label>
               <input value={uploadForm.url} onChange={(e) => setUploadForm((f) => ({ ...f, url: e.target.value }))} placeholder="https://…" style={inputStyle} />
@@ -224,7 +224,7 @@ export default function ImagesPage() {
               <button onClick={handleUpload} disabled={uploading} style={{ flex: 1, padding: "10px 0", background: "#111", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: uploading ? "not-allowed" : "pointer", opacity: uploading ? 0.5 : 1 }}>
                 {uploading ? "Uploading…" : "Upload"}
               </button>
-              <button onClick={() => setShowUpload(false)} style={{ flex: 1, padding: "10px 0", background: "#f3f4f6", color: "#111", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+              <button onClick={() => setShowUpload(false)} style={{ flex: 1, padding: "10px 0", background: "var(--bg-muted)", color: "var(--text-primary)", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
             </div>
           </div>
         </div>
@@ -235,8 +235,8 @@ export default function ImagesPage() {
 
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28, gap: 16, flexWrap: "wrap" }}>
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: "#111", margin: "0 0 6px", letterSpacing: "-0.01em" }}>Images</h1>
-          <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: "var(--text-primary)", margin: "0 0 6px", letterSpacing: "-0.01em" }}>Images</h1>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>
             {loading ? "Loading…" : `Showing ${images.length.toLocaleString()} of ${totalCount.toLocaleString()}`}
           </p>
         </div>
@@ -249,23 +249,23 @@ export default function ImagesPage() {
               {f === "all" ? "All" : f === "public" ? "Public" : "Common Use"}
             </button>
           ))}
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search description…" style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 13, outline: "none", width: 200, background: "#fff" }} />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search description…" style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 13, outline: "none", width: 200, background: "var(--bg-card)" }} />
         </div>
       </div>
 
       {error && <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "12px 16px", marginBottom: 20, fontSize: 13, color: "#991b1b" }}>{error}</div>}
 
-      <div style={{ background: "#fff", borderRadius: 14, overflow: "hidden" }}>
+      <div style={{ background: "var(--bg-card)", borderRadius: 14, overflow: "hidden" }}>
         {loading ? (
-          <div style={{ padding: 48, textAlign: "center", color: "rgba(0,0,0,0.35)", fontSize: 14 }}>Loading…</div>
+          <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>Loading…</div>
         ) : images.length === 0 ? (
-          <div style={{ padding: 48, textAlign: "center", color: "rgba(0,0,0,0.35)", fontSize: 14 }}>No images found.</div>
+          <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>No images found.</div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "#f9fafb", borderBottom: "1px solid #f3f4f6" }}>
+              <tr style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-subtle)" }}>
                 {["", "Uploader", "Context / Description", "Public", "Common Use", "Uploaded", ""].map((h, i) => (
-                  <th key={i} style={{ padding: "12px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.4)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{h}</th>
+                  <th key={i} style={{ padding: "12px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -273,21 +273,21 @@ export default function ImagesPage() {
               {images.map((img, i) => {
                 const uploaderName = [img.profiles?.first_name, img.profiles?.last_name].filter(Boolean).join(" ") || img.profiles?.email || "Unknown";
                 return (
-                  <tr key={img.id} style={{ borderBottom: i < images.length - 1 ? "1px solid #f3f4f6" : "none" }}>
+                  <tr key={img.id} style={{ borderBottom: i < images.length - 1 ? "1px solid var(--border-subtle)" : "none" }}>
                     <td style={{ padding: "10px 12px 10px 16px", width: 72 }}>
                       {img.url ? (
-                        <img src={img.url} alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, display: "block", background: "#f3f4f6" }} />
+                        <img src={img.url} alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, display: "block", background: "var(--bg-muted)" }} />
                       ) : (
-                        <div style={{ width: 56, height: 56, borderRadius: 8, background: "#f3f4f6" }} />
+                        <div style={{ width: 56, height: 56, borderRadius: 8, background: "var(--bg-muted)" }} />
                       )}
                     </td>
                     <td style={{ padding: "10px 16px" }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: "#111" }}>{uploaderName}</div>
-                      <div style={{ fontSize: 11, color: "rgba(0,0,0,0.35)" }}>{img.profiles?.email}</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{uploaderName}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{img.profiles?.email}</div>
                     </td>
                     <td style={{ padding: "10px 16px", maxWidth: 220 }}>
-                      <div style={{ fontSize: 12, color: "rgba(0,0,0,0.55)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {img.additional_context || img.image_description || <span style={{ color: "rgba(0,0,0,0.25)" }}>—</span>}
+                      <div style={{ fontSize: 12, color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {img.additional_context || img.image_description || <span style={{ color: "var(--text-faint)" }}>—</span>}
                       </div>
                     </td>
                     <td style={{ padding: "10px 16px" }}>
@@ -301,13 +301,13 @@ export default function ImagesPage() {
                       </button>
                     </td>
                     <td style={{ padding: "10px 16px" }}>
-                      <span style={{ fontSize: 12, color: "rgba(0,0,0,0.35)" }}>
+                      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
                         {img.created_datetime_utc ? new Date(img.created_datetime_utc).toLocaleDateString() : "—"}
                       </span>
                     </td>
                     <td style={{ padding: "10px 16px" }}>
                       <div style={{ display: "flex", gap: 6 }}>
-                        <button onClick={() => openEdit(img)} style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #e5e7eb", background: "#fff", color: "#111", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Edit</button>
+                        <button onClick={() => openEdit(img)} style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text-primary)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Edit</button>
                         <button onClick={() => handleDelete(img.id)} disabled={deleting === img.id} style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #fecaca", background: "#fef2f2", color: "#dc2626", fontSize: 12, fontWeight: 600, cursor: deleting === img.id ? "not-allowed" : "pointer", opacity: deleting === img.id ? 0.5 : 1 }}>
                           {deleting === img.id ? "…" : "Delete"}
                         </button>
@@ -323,7 +323,7 @@ export default function ImagesPage() {
 
       {hasMore && (
         <div style={{ textAlign: "center", marginTop: 20 }}>
-          <button onClick={loadMore} disabled={loadingMore} style={{ padding: "10px 28px", borderRadius: 8, border: "1px solid #e5e7eb", background: "#fff", color: "#111", fontSize: 13, fontWeight: 600, cursor: loadingMore ? "not-allowed" : "pointer", opacity: loadingMore ? 0.6 : 1 }}>
+          <button onClick={loadMore} disabled={loadingMore} style={{ padding: "10px 28px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text-primary)", fontSize: 13, fontWeight: 600, cursor: loadingMore ? "not-allowed" : "pointer", opacity: loadingMore ? 0.6 : 1 }}>
             {loadingMore ? "Loading…" : `Load More (${(totalCount - images.length).toLocaleString()} remaining)`}
           </button>
         </div>

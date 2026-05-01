@@ -31,8 +31,8 @@ function Badge({
         borderRadius: 999,
         fontSize: 11,
         fontWeight: 700,
-        background: on ? color + "18" : "#f3f4f6",
-        color: on ? color : "rgba(0,0,0,0.35)",
+        background: on ? color + "18" : "var(--bg-muted)",
+        color: on ? color : "var(--text-muted)",
         letterSpacing: "0.04em",
       }}
     >
@@ -158,14 +158,14 @@ export default function UsersPage() {
             style={{
               fontSize: 26,
               fontWeight: 800,
-              color: "#111",
+              color: "var(--text-primary)",
               margin: "0 0 6px",
               letterSpacing: "-0.01em",
             }}
           >
             Users
           </h1>
-          <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>
             {loading ? "Loading…" : `Showing ${profiles.length.toLocaleString()} of ${totalCount.toLocaleString()}`}
           </p>
         </div>
@@ -179,7 +179,7 @@ export default function UsersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name or email…"
-            style={{ padding: "10px 16px", borderRadius: 10, border: "1px solid #e5e7eb", fontSize: 14, outline: "none", width: 240, background: "#fff" }}
+            style={{ padding: "10px 16px", borderRadius: 10, border: "1px solid var(--border)", fontSize: 14, outline: "none", width: 240, background: "var(--bg-card)" }}
           />
         </div>
       </div>
@@ -202,7 +202,7 @@ export default function UsersPage() {
 
       <div
         style={{
-          background: "#fff",
+          background: "var(--bg-card)",
           borderRadius: 14,
           overflow: "hidden",
         }}
@@ -212,7 +212,7 @@ export default function UsersPage() {
             style={{
               padding: 48,
               textAlign: "center",
-              color: "rgba(0,0,0,0.35)",
+              color: "var(--text-muted)",
               fontSize: 14,
             }}
           >
@@ -223,7 +223,7 @@ export default function UsersPage() {
             style={{
               padding: 48,
               textAlign: "center",
-              color: "rgba(0,0,0,0.35)",
+              color: "var(--text-muted)",
               fontSize: 14,
             }}
           >
@@ -234,8 +234,8 @@ export default function UsersPage() {
             <thead>
               <tr
                 style={{
-                  background: "#f9fafb",
-                  borderBottom: "1px solid #f3f4f6",
+                  background: "var(--bg-subtle)",
+                  borderBottom: "1px solid var(--border-subtle)",
                 }}
               >
                 {[
@@ -253,7 +253,7 @@ export default function UsersPage() {
                       textAlign: "left",
                       fontSize: 11,
                       fontWeight: 700,
-                      color: "rgba(0,0,0,0.4)",
+                      color: "var(--text-muted)",
                       letterSpacing: "0.06em",
                       textTransform: "uppercase",
                     }}
@@ -274,7 +274,7 @@ export default function UsersPage() {
                     style={{
                       borderBottom:
                         i < filtered.length - 1
-                          ? "1px solid #f3f4f6"
+                          ? "1px solid var(--border-subtle)"
                           : "none",
                     }}
                   >
@@ -302,7 +302,7 @@ export default function UsersPage() {
                           style={{
                             fontSize: 13,
                             fontWeight: 600,
-                            color: "#111",
+                            color: "var(--text-primary)",
                           }}
                         >
                           {name}
@@ -314,7 +314,7 @@ export default function UsersPage() {
                       <span
                         style={{
                           fontSize: 13,
-                          color: "rgba(0,0,0,0.55)",
+                          color: "var(--text-secondary)",
                         }}
                       >
                         {p.email ?? "—"}
@@ -373,7 +373,7 @@ export default function UsersPage() {
                       <span
                         style={{
                           fontSize: 12,
-                          color: "rgba(0,0,0,0.35)",
+                          color: "var(--text-muted)",
                         }}
                       >
                         {p.created_datetime_utc
@@ -393,7 +393,7 @@ export default function UsersPage() {
 
       {profiles.length < totalCount && (
         <div style={{ textAlign: "center", marginTop: 20 }}>
-          <button onClick={loadMore} disabled={loadingMore} style={{ padding: "10px 28px", borderRadius: 8, border: "1px solid #e5e7eb", background: "#fff", color: "#111", fontSize: 13, fontWeight: 600, cursor: loadingMore ? "not-allowed" : "pointer", opacity: loadingMore ? 0.6 : 1 }}>
+          <button onClick={loadMore} disabled={loadingMore} style={{ padding: "10px 28px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text-primary)", fontSize: 13, fontWeight: 600, cursor: loadingMore ? "not-allowed" : "pointer", opacity: loadingMore ? 0.6 : 1 }}>
             {loadingMore ? "Loading…" : `Load More (${(totalCount - profiles.length).toLocaleString()} remaining)`}
           </button>
         </div>

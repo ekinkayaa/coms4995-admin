@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-client";
+import { useTheme, type Theme } from "@/app/ThemeProvider";
 
 const NAV_GROUPS = [
   {
@@ -46,10 +47,17 @@ const NAV_GROUPS = [
   },
 ];
 
+const THEMES: { value: Theme; label: string }[] = [
+  { value: "light", label: "Light" },
+  { value: "dark",  label: "Dark"  },
+  { value: "system", label: "Auto" },
+];
+
 export default function Sidebar({ email, name }: { email: string | null; name: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const { theme, setTheme } = useTheme();
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -155,6 +163,29 @@ export default function Sidebar({ email, name }: { email: string | null; name: s
         >
           {email}
         </div>
+        {/* Theme toggle */}
+        <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
+          {THEMES.map(({ value, label }) => (
+            <button
+              key={value}
+              onClick={() => setTheme(value)}
+              style={{
+                flex: 1,
+                padding: "5px 0",
+                borderRadius: 5,
+                border: "none",
+                background: theme === value ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.06)",
+                color: theme === value ? "#fff" : "rgba(255,255,255,0.4)",
+                fontSize: 11,
+                fontWeight: theme === value ? 700 : 400,
+                cursor: "pointer",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <button
           onClick={handleSignOut}
           style={{

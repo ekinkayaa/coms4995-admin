@@ -15,7 +15,7 @@ function StatCard({
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--bg-card)",
         borderRadius: 14,
         padding: "24px 28px",
         flex: 1,
@@ -26,7 +26,7 @@ function StatCard({
         style={{
           fontSize: 11,
           fontWeight: 700,
-          color: "rgba(0,0,0,0.38)",
+          color: "var(--text-muted)",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
           marginBottom: 10,
@@ -49,7 +49,7 @@ function StatCard({
         <div
           style={{
             fontSize: 12,
-            color: "rgba(0,0,0,0.38)",
+            color: "var(--text-muted)",
             marginTop: 6,
           }}
         >
@@ -70,7 +70,7 @@ function Card({
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--bg-card)",
         borderRadius: 14,
         padding: "24px 28px",
       }}
@@ -79,7 +79,7 @@ function Card({
         style={{
           fontSize: 15,
           fontWeight: 800,
-          color: "#111",
+          color: "var(--text-primary)",
           margin: "0 0 20px",
           letterSpacing: "0.01em",
         }}
@@ -183,14 +183,14 @@ export default async function DashboardPage() {
           style={{
             fontSize: 26,
             fontWeight: 800,
-            color: "#111",
+            color: "var(--text-primary)",
             margin: "0 0 6px",
             letterSpacing: "-0.01em",
           }}
         >
           Dashboard
         </h1>
-        <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>
+        <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>
           Live overview of almostcrackd.ai
         </p>
       </div>
@@ -290,7 +290,7 @@ export default async function DashboardPage() {
       {(voteCount ?? 0) > 0 && (
         <div
           style={{
-            background: "#fff",
+            background: "var(--bg-card)",
             borderRadius: 14,
             padding: "20px 28px",
             marginBottom: 28,
@@ -308,12 +308,12 @@ export default async function DashboardPage() {
               style={{
                 fontSize: 13,
                 fontWeight: 700,
-                color: "#111",
+                color: "var(--text-primary)",
               }}
             >
               Vote Sentiment
             </span>
-            <span style={{ fontSize: 12, color: "rgba(0,0,0,0.38)" }}>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
               {upvoteCount ?? 0} upvotes · {(voteCount ?? 0) - (upvoteCount ?? 0)} downvotes
             </span>
           </div>
@@ -321,7 +321,7 @@ export default async function DashboardPage() {
             style={{
               height: 10,
               borderRadius: 999,
-              background: "#f3f4f6",
+              background: "var(--bg-muted)",
               overflow: "hidden",
             }}
           >
@@ -349,7 +349,7 @@ export default async function DashboardPage() {
         {/* Top Captions */}
         <Card title="Top 10 Captions by Likes">
           {(topCaptions ?? []).length === 0 ? (
-            <p style={{ color: "rgba(0,0,0,0.35)", fontSize: 13 }}>
+            <p style={{ color: "var(--text-muted)", fontSize: 13 }}>
               No captions yet.
             </p>
           ) : (
@@ -364,7 +364,7 @@ export default async function DashboardPage() {
                     padding: "10px 0",
                     borderBottom:
                       i < (topCaptions ?? []).length - 1
-                        ? "1px solid #f3f4f6"
+                        ? "1px solid var(--border-subtle)"
                         : "none",
                   }}
                 >
@@ -385,7 +385,7 @@ export default async function DashboardPage() {
                       style={{
                         fontSize: 13,
                         fontWeight: 600,
-                        color: "#111",
+                        color: "var(--text-primary)",
                         lineHeight: 1.45,
                         marginBottom: 3,
                       }}
@@ -394,7 +394,7 @@ export default async function DashboardPage() {
                       {(c.content?.length ?? 0) > 90 ? "…" : ""}
                     </div>
                     <div
-                      style={{ fontSize: 11, color: "rgba(0,0,0,0.35)" }}
+                      style={{ fontSize: 11, color: "var(--text-muted)" }}
                     >
                       ❤️ {c.like_count} ·{" "}
                       {(c.profiles as any)?.email ?? "Unknown"}
@@ -410,7 +410,7 @@ export default async function DashboardPage() {
           {/* Top Uploaders */}
           <Card title="Top Uploaders">
             {topUploaders.length === 0 ? (
-              <p style={{ color: "rgba(0,0,0,0.35)", fontSize: 13 }}>
+              <p style={{ color: "var(--text-muted)", fontSize: 13 }}>
                 No uploads yet.
               </p>
             ) : (
@@ -453,7 +453,7 @@ export default async function DashboardPage() {
                       <div
                         style={{
                           fontSize: 13,
-                          color: "#111",
+                          color: "var(--text-primary)",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -467,7 +467,7 @@ export default async function DashboardPage() {
                       style={{
                         fontSize: 13,
                         fontWeight: 700,
-                        color: "#111",
+                        color: "var(--text-primary)",
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -482,7 +482,7 @@ export default async function DashboardPage() {
           {/* Recent Signups */}
           <Card title="Recent Signups">
             {(recentUsers ?? []).length === 0 ? (
-              <p style={{ color: "rgba(0,0,0,0.35)", fontSize: 13 }}>
+              <p style={{ color: "var(--text-muted)", fontSize: 13 }}>
                 No users yet.
               </p>
             ) : (
@@ -525,7 +525,7 @@ export default async function DashboardPage() {
                       <div
                         style={{
                           fontSize: 13,
-                          color: "#111",
+                          color: "var(--text-primary)",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -539,7 +539,7 @@ export default async function DashboardPage() {
                     <div
                       style={{
                         fontSize: 11,
-                        color: "rgba(0,0,0,0.35)",
+                        color: "var(--text-muted)",
                         whiteSpace: "nowrap",
                       }}
                     >

@@ -25,8 +25,8 @@ function Badge({ on, label, color = "#16a34a" }: { on: boolean; label: string; c
         borderRadius: 999,
         fontSize: 11,
         fontWeight: 700,
-        background: on ? color + "18" : "#f3f4f6",
-        color: on ? color : "rgba(0,0,0,0.35)",
+        background: on ? color + "18" : "var(--bg-muted)",
+        color: on ? color : "var(--text-muted)",
         letterSpacing: "0.04em",
       }}
     >
@@ -215,14 +215,14 @@ export default function CaptionsPage() {
             style={{
               fontSize: 26,
               fontWeight: 800,
-              color: "#111",
+              color: "var(--text-primary)",
               margin: "0 0 6px",
               letterSpacing: "-0.01em",
             }}
           >
             Captions
           </h1>
-          <p style={{ fontSize: 14, color: "rgba(0,0,0,0.38)", margin: 0 }}>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>
             {loading ? "Loading…" : `Showing ${captions.length.toLocaleString()} of ${totalCount.toLocaleString()}`}
           </p>
         </div>
@@ -232,7 +232,7 @@ export default function CaptionsPage() {
               {f === "all" ? "All" : f === "featured" ? "Featured" : "Public"}
             </button>
           ))}
-          <div style={{ width: 1, background: "#e5e7eb", alignSelf: "stretch" }} />
+          <div style={{ width: 1, background: "var(--border)", alignSelf: "stretch" }} />
           {(["newest", "oldest", "most_liked", "least_liked"] as const).map((s) => (
             <button key={s} onClick={() => setSort(s)} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid", borderColor: sort === s ? "#4f46e5" : "#e5e7eb", background: sort === s ? "#4f46e5" : "#fff", color: sort === s ? "#fff" : "#111", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
               {s === "newest" ? "Newest" : s === "oldest" ? "Oldest" : s === "most_liked" ? "Most Liked" : "Least Liked"}
@@ -245,11 +245,11 @@ export default function CaptionsPage() {
             style={{
               padding: "8px 14px",
               borderRadius: 8,
-              border: "1px solid #e5e7eb",
+              border: "1px solid var(--border)",
               fontSize: 13,
               outline: "none",
               width: 220,
-              background: "#fff",
+              background: "var(--bg-card)",
             }}
           />
         </div>
@@ -271,19 +271,19 @@ export default function CaptionsPage() {
         </div>
       )}
 
-      <div style={{ background: "#fff", borderRadius: 14, overflow: "hidden" }}>
+      <div style={{ background: "var(--bg-card)", borderRadius: 14, overflow: "hidden" }}>
         {loading ? (
-          <div style={{ padding: 48, textAlign: "center", color: "rgba(0,0,0,0.35)", fontSize: 14 }}>
+          <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>
             Loading…
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ padding: 48, textAlign: "center", color: "rgba(0,0,0,0.35)", fontSize: 14 }}>
+          <div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>
             No captions found.
           </div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "#f9fafb", borderBottom: "1px solid #f3f4f6" }}>
+              <tr style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-subtle)" }}>
                 {["", "Caption", "Author", "❤️ Likes", "Featured", "Public", "Created", ""].map((h, i) => (
                   <th
                     key={i}
@@ -292,7 +292,7 @@ export default function CaptionsPage() {
                       textAlign: "left",
                       fontSize: 11,
                       fontWeight: 700,
-                      color: "rgba(0,0,0,0.4)",
+                      color: "var(--text-muted)",
                       letterSpacing: "0.06em",
                       textTransform: "uppercase",
                       whiteSpace: "nowrap",
@@ -315,7 +315,7 @@ export default function CaptionsPage() {
                   <tr
                     key={c.id}
                     style={{
-                      borderBottom: i < filtered.length - 1 ? "1px solid #f3f4f6" : "none",
+                      borderBottom: i < filtered.length - 1 ? "1px solid var(--border-subtle)" : "none",
                     }}
                   >
                     {/* Image thumb */}
@@ -333,7 +333,7 @@ export default function CaptionsPage() {
                             objectFit: "cover",
                             borderRadius: 6,
                             display: "block",
-                            background: "#f3f4f6",
+                            background: "var(--bg-muted)",
                           }}
                         />
                       ) : (
@@ -342,7 +342,7 @@ export default function CaptionsPage() {
                             width: 44,
                             height: 44,
                             borderRadius: 6,
-                            background: "#f3f4f6",
+                            background: "var(--bg-muted)",
                           }}
                         />
                       )}
@@ -353,7 +353,7 @@ export default function CaptionsPage() {
                         style={{
                           fontSize: 13,
                           fontWeight: 600,
-                          color: "#111",
+                          color: "var(--text-primary)",
                           lineHeight: 1.45,
                           overflow: "hidden",
                           display: "-webkit-box",
@@ -366,16 +366,16 @@ export default function CaptionsPage() {
                     </td>
                     {/* Author */}
                     <td style={{ padding: "10px 16px" }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: "#111" }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
                         {authorName}
                       </div>
-                      <div style={{ fontSize: 11, color: "rgba(0,0,0,0.35)" }}>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
                         {c.profiles?.email}
                       </div>
                     </td>
                     {/* Likes */}
                     <td style={{ padding: "10px 16px" }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: "#111" }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
                         {c.like_count}
                       </span>
                     </td>
@@ -399,7 +399,7 @@ export default function CaptionsPage() {
                     </td>
                     {/* Created */}
                     <td style={{ padding: "10px 16px" }}>
-                      <span style={{ fontSize: 12, color: "rgba(0,0,0,0.35)" }}>
+                      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
                         {c.created_datetime_utc
                           ? new Date(c.created_datetime_utc).toLocaleDateString()
                           : "—"}
@@ -436,7 +436,7 @@ export default function CaptionsPage() {
 
       {captions.length < totalCount && (
         <div style={{ textAlign: "center", marginTop: 20 }}>
-          <button onClick={loadMore} disabled={loadingMore} style={{ padding: "10px 28px", borderRadius: 8, border: "1px solid #e5e7eb", background: "#fff", color: "#111", fontSize: 13, fontWeight: 600, cursor: loadingMore ? "not-allowed" : "pointer", opacity: loadingMore ? 0.6 : 1 }}>
+          <button onClick={loadMore} disabled={loadingMore} style={{ padding: "10px 28px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text-primary)", fontSize: 13, fontWeight: 600, cursor: loadingMore ? "not-allowed" : "pointer", opacity: loadingMore ? 0.6 : 1 }}>
             {loadingMore ? "Loading…" : `Load More (${(totalCount - captions.length).toLocaleString()} remaining)`}
           </button>
         </div>

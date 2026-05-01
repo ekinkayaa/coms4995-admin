@@ -36,7 +36,7 @@ export default async function AdminLayout({
       }}
     >
       <Sidebar email={profile.email} name={name} />
-      <main style={{ flex: 1, background: "#f5f5f5", overflowY: "auto" }}>
+      <main style={{ flex: 1, background: "var(--bg-page)", overflowY: "auto" }}>
         {children}
       </main>
     </div>
