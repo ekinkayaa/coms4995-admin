@@ -5,7 +5,7 @@ function StatCard({
   label,
   value,
   sub,
-  accent = "#111",
+  accent = "var(--text-primary)",
 }: {
   label: string;
   value: string | number;
@@ -372,7 +372,7 @@ export default async function DashboardPage() {
                     style={{
                       fontSize: 13,
                       fontWeight: 800,
-                      color: "rgba(0,0,0,0.2)",
+                      color: "var(--text-faint)",
                       width: 20,
                       flexShrink: 0,
                       paddingTop: 1,
